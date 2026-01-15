@@ -50,7 +50,7 @@ st.title("⚡ 變電站區域供電範圍查詢系統")
 uploaded_file = st.file_uploader("請上傳變電站 Excel 檔案", type=["xlsx"])
 
 if uploaded_file and geojson_data:
-    df = pd.read_excel(uploaded_file)
+    df = pd.read_excel(uploaded_file, engine='openpyxl')
     
     # 側邊欄：選擇變電站
     st.sidebar.header("篩選控制台")
@@ -79,6 +79,9 @@ if uploaded_file and geojson_data:
     # 拆分 Excel 供電範圍內容 (支援：基隆市、新北市汐止區、宜蘭縣 等)
     target_areas = [a.strip() for a in re.split(r'[、,， \s]', raw_range) if a.strip()]
     
+    success_list = []  # 成功找到 GeoJSON 的區域
+    fail_list = []     # 找不到資料的區域   
+
     filtered_features = []
     
     # 根據您的 JSON 內容，屬性名稱通常為：
@@ -99,7 +102,13 @@ if uploaded_file and geojson_data:
             # 3. Excel 寫複合名 (如 "新北市汐止區") -> 匹配 combined_name
             if area == this_county or area == this_town or area == combined_name:
                 filtered_features.append(f)
-                break 
+                if area not in success_list:
+                    success_list.append(area)
+                    
+                break
+
+    # 找出不在 GeoJSON 裡的區域
+    fail_list = [a for a in target_areas if a not in success_list]
 
     if filtered_features:
         # 移除重複選取的 Feature
@@ -129,7 +138,9 @@ if uploaded_file and geojson_data:
             )
         ).add_to(m)
         
-        st.success(f"✅ 已成功標記供電範圍：{', '.join(target_areas)}")
+        st.success(f"✅ 已成功標記供電範圍：{', '.join(success_list)}")
+        if fail_list:
+            st.warning(f"❌ 找不到與「{fail_list}」匹配的邊界。")
     else:
         st.warning(f"❌ 找不到與「{raw_range}」匹配的邊界。")
 
