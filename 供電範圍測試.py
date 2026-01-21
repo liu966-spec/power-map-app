@@ -23,7 +23,7 @@ def create_popup_html(row):
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <tr><td style="width: 60px; vertical-align: top;"><b>類別：</b></td><td>{row.get('類別', 'N/A')}</td></tr>
             <tr><td style="width: 60px; vertical-align: top;"><b>變壓器：</b></td><td>{row.get('變壓器別', 'N/A')}</td></tr>
-            <tr><td style="width: 60px; vertical-align: top;"><b>地址：</b></td><td>{row['地址']}</td></tr>
+
         </table>
     </div>
     """
@@ -158,4 +158,5 @@ if uploaded_file and geojson_data:
     st_folium(m, width="100%", height=650)
 
 elif not uploaded_file:
+
     st.info("請上傳 Excel 檔案以開始。")
